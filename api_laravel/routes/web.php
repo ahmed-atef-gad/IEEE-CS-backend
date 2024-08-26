@@ -19,10 +19,14 @@ Route::get('/hello/{name}', function ($name) {
     $names = array_map('trim', explode("\n", trim(Storage::get($filename))));
 
     if (in_array($name, $names)) {
-        return "Hello again, {$name}!";
+        return response()->json([
+            'message' => "Hello again, {$name}!"
+        ]);
     } else {
         Storage::append($filename, $name);
-        return "Hello, {$name}!";
+        return response()->json([
+            'message' => "Hello, {$name}!"
+        ]);
     }
 });
 
@@ -31,9 +35,15 @@ Route::get('/names', function () {
     $filename = 'names.txt';
 
     if (!Storage::exists($filename) || trim(Storage::get($filename)) == '') {
-        return response("No names found.")->header('Content-Type', 'text/plain');
+        return response()->json([
+            'message' => 'No names found.'
+        ]);
     }
 
-    $names = explode("\n", trim(Storage::get($filename)));
-    return response(implode("\n", $names))->header('Content-Type', 'text/plain');
+    $names = array_map(function($name) {
+        return trim($name, "\r\n");
+    }, explode("\n", trim(Storage::get($filename))));
+    return response()->json([
+        'names' => $names
+    ]);
 });
